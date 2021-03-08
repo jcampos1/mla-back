@@ -1,3 +1,7 @@
+/**
+ * Prepare the item
+ * @param {Object} item is product
+ */
 const buildItem = item => ({
     id: item.id,
     title: item.title,
@@ -11,7 +15,13 @@ const buildItem = item => ({
     free_shipping: item.shipping.free_shipping,
 });
 
-const formatData = (author, categories, items) => ({
+/**
+ * Prepare the data to return
+ * @param {Object} author 
+ * @param {Object} categories is used in breadcumb
+ * @param {Array} items is a list items
+ */
+const buildData = (author, categories, items) => ({
     author,
     categories,
     ...items,
@@ -19,5 +29,5 @@ const formatData = (author, categories, items) => ({
 
 module.exports = {
     buildItem,
-    formatData,
+    buildData,
 }

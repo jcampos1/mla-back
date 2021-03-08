@@ -20,7 +20,7 @@ app.get('/api/items', async (req, res) => {
             categories = data.filters[0].values[0].path_from_root.map(category => category.name);
         }
         const items = data.results.map(item => utils.buildItem(item));
-        const formattedData = utils.formatData(res.author, categories, {items});
+        const formattedData = utils.buildData(res.author, categories, {items});
         res.json(formattedData);
     } else {
         res.status(status).json({statusText});
@@ -42,7 +42,7 @@ app.get('/api/items/:id', (req, res) => {
             sold_quantity: data.sold_quantity,
             description,
         };
-        const formattedData = utils.formatData(res.author, [], {item});
+        const formattedData = utils.buildData(res.author, [], {item});
         res.json(formattedData);
     })).catch(error => {
         const { status, statusText } = error.response;
