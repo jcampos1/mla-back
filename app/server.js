@@ -41,12 +41,13 @@ app.get('/api/items/:id', async (req, res) => {
         ]).then(axios.spread((response1, response2) => {
             const { data: fullCategory, } = response1;
             const { plain_text: description } = response2.data;
+            const { path_from_root = [] } = fullCategory;
             const item = {
                 ...utils.buildItem(data),
                 sold_quantity: data.sold_quantity,
                 description,
             };
-            const formattedData = utils.buildData(res.author, fullCategory.path_from_root, {item});
+            const formattedData = utils.buildData(res.author, path_from_root, {item});
             res.json(formattedData);
         })).catch(error => {
             const { status, statusText } = error.response;
