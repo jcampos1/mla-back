@@ -23,7 +23,7 @@ const buildItem = item => ({
  */
 const buildData = (author, categories, items) => ({
     author,
-    categories,
+    categories: categories.map(category => category.name),
     ...items,
 });
 

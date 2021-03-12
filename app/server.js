@@ -17,7 +17,7 @@ app.get('/api/items', async (req, res) => {
         // categories are extracted
         let categories = [];
         if(data.filters[0]) {
-            categories = data.filters[0].values[0].path_from_root.map(category => category.name);
+            categories = data.filters[0].values[0].path_from_root;
         }
         const items = data.results.map(item => utils.buildItem(item));
         const formattedData = utils.buildData(res.author, categories, {items});
@@ -27,27 +27,34 @@ app.get('/api/items', async (req, res) => {
     }
 });
 
-app.get('/api/items/:id', (req, res) => {
+app.get('/api/items/:id', async (req, res) => {
     const { id, } = req.params;
     const detailEndpoint = `${config.API_URL}/items/${id}`;
-    const descriptionEndpoint = `${detailEndpoint}/description`;
-    axios.all([
-        axios.get(detailEndpoint),
-        axios.get(descriptionEndpoint)
-    ]).then(axios.spread((response1, response2) => {
-        const { data, } = response1;
-        const { plain_text: description } = response2.data;
-        const item = {
-            ...utils.buildItem(data),
-            sold_quantity: data.sold_quantity,
-            description,
-        };
-        const formattedData = utils.buildData(res.author, [], {item});
-        res.json(formattedData);
-    })).catch(error => {
-        const { status, statusText } = error.response;
+    const itemDetailResponse = await axios.get(detailEndpoint);
+    const { status, statusText, data, } = itemDetailResponse;
+    if(status === 200) {
+        const categoriesEndpoint = `${config.API_URL}/categories/${data.category_id}`;
+        const descriptionEndpoint = `${detailEndpoint}/description`;
+        axios.all([
+            axios.get(categoriesEndpoint),
+            axios.get(descriptionEndpoint)
+        ]).then(axios.spread((response1, response2) => {
+            const { data: fullCategory, } = response1;
+            const { plain_text: description } = response2.data;
+            const item = {
+                ...utils.buildItem(data),
+                sold_quantity: data.sold_quantity,
+                description,
+            };
+            const formattedData = utils.buildData(res.author, fullCategory.path_from_root, {item});
+            res.json(formattedData);
+        })).catch(error => {
+            const { status, statusText } = error.response;
+            res.status(status).json({statusText});
+        });
+    } else {
         res.status(status).json({statusText});
-    });
+    }  
 });
 
 app.listen(config.PORT);
